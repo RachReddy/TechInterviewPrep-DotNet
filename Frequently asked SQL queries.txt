@@ -1,1 +1,205 @@
+BASICS
+=======
+
+1. Select all columns from a table:
+  SELECT * FROM table_name;
+
+2. Find unique values in a column:
+  SELECT DISTINCT column_name FROM table_name;
+
+3. Filter data using WHERE:
+  SELECT * FROM employees WHERE salary > 50000;
+
+4. Order data:
+  SELECT * FROM employees ORDER BY salary DESC;
+
+
+MEDIUM LEVEL QUERIES
+=====================
+
+1. Find total salar
+  SELECT SUM(salary) FROM employees;
+
+2. Count employees in a department
+  SELECT department, COUNT(*) FROM employees GROUP BY department;
+
+3. Find Duplicate Records:
+  SELECT column_name, COUNT(*) 
+  FROM table_name 
+  GROUP BY column_name 
+  HAVING COUNT(*) > 1;
+
+4. retrieves employees whose salary is greater than the average salary of all employees
+
+  SELECT name
+  FROM employees
+  WHERE salary > (SELECT AVG(salary) FROM employees)
+
+5. Find nth highest salary:
+
+SELECT DISTINCT salary 
+FROM employees 
+ORDER BY salary DESC 
+LIMIT 1 OFFSET n-1; -- Replace n with the rank
+
+eg: for 3rd highest sal => limit 1 offset 2
+
+6. Delete Duplicate Records:
+
+DELETE FROM employees  
+WHERE id NOT IN (
+  SELECT MIN(id) 
+  FROM employees 
+  GROUP BY name, department_id, salary
+);
+
+
+Example employees Table (Before Deletion):
+id	name	 department_id	salary
+1	  Alice	    101	          50,000
+2	  Alice	    101	          50,000
+3	  Bob	      102	          60,000
+4	  Bob      	102	          60,000
+5	  Charlie	  103	          70,000
+
+Result of the Subquery: For each group, it selects the smallest id.
+MIN(id)
+1       (1,2)
+3       (3,4)
+5        (5)
+
+
+output: The outer query deletes all rows where the id is not in the list returned by the subquery (1, 3, 5).
+
+Final employees Table (After Deletion):
+id	name	  department_id	  salary
+1	  Alice	    101	          50,000
+3	  Bob	      102	          60,000
+5	  Charlie  	103	          70,000
+
+----------------------------------------------------------------------------------------------
+
+
+
+7. Find the highest salary in each department.
+
+SELECT department_id, MAX(salary) 
+FROM employees 
+GROUP BY department_id;
+
+8. Second Highest Salary
+
+SELECT salary AS secondHighSal
+FROM employees
+GROUP BY salary
+ORDER BY salary desc
+LIMIT 1 OFFSET 1
+
+9. Department Employee Count
+
+SELECT department_id, COUNT(*) 
+FROM employees 
+GROUP BY department_id;
+
+10. Delete Duplicate Emails :  Delete duplicate emails from the "employees" table.
+
+DELETE FROM employees 
+WHERE id NOT IN (
+    SELECT MIN(id) 
+    FROM employees 
+    GROUP BY email
+);
+
+11. Duplicate Emails : Find duplicate email addresses from the "employees" table.
+
+SELECT email
+FROM employees 
+GROUP BY email 
+HAVING COUNT(email) > 1;
+
+OR 
+SELECT email, COUNT(*) 
+FROM employees 
+GROUP BY email 
+HAVING COUNT(*) > 1;
+
+12. Employee With Highest Salary
+
+SELECT name 
+FROM employees 
+WHERE salary = (SELECT MAX(salary) FROM employees);
+
+13. Top 10 Salaries
+
+SELECT DISTINCT salary 
+FROM employees 
+ORDER BY salary DESC 
+LIMIT 10;
+
+14. Find employees who have a bonus greater than 5000.
+
+SELECT name, bonus 
+FROM employees 
+WHERE bonus > 5000;
+
+15.  Group employees by department and calculate the total salary for each department.
+
+SELECT department_id, SUM(salary) 
+FROM employees 
+GROUP BY department_id;
+
+16. Find employees who have never placed an order (use LEFT JOIN).
+
+SELECT e.name 
+FROM employees e
+LEFT JOIN orders o ON e.id = o.employee_id
+WHERE o.employee_id IS NULL;
+
+
+17. Rank Employees: Rank employees based on their salary, with the highest salary ranked 1.
+
+SELECT name, salary, 
+RANK() OVER (ORDER BY salary DESC) AS rank
+FROM employees;
+
+-  uses a window function called RANK() to assign a rank to each employee based on theirsalary.
+- RANK() gives the same rank to employees with the same salary. However, it skips ranks if there are ties. 
+- For example, if two employees have the same salary, they both get rank 1, and the next rank will be 3 (skipping 2).
+
+
+name	  salary
+Alice	  80000
+Bob	    75000
+Charlie	80000
+David	  70000
+Eve	    75000
+
+name	salary	rank
+Alice	80000	    1
+Charlie	80000	  1
+Bob	75000	      3
+Eve	75000	      3
+David	70000	    5
+
+----------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
