@@ -1,0 +1,594 @@
+BASIC DATABASE COMMANDS
+--------------------------
+
+
+create database projectdb;
+
+
+use projectdb;
+
+
+create table studenttab( 
+id int primary key auto_increment,
+sname varchar(20),
+scourse varchar(20),
+sfee int
+);
+
+select * from studenttab;
+
+
+insert into studenttab values(10, "rach", "DSA", 100);
+insert into studenttab values(11, "cutu", "ALgorithm", 150);
+insert into studenttab values(12, "Mr.barla", "networks", 170);
+insert into studenttab values(13, "BSagar", "graphs", 190);
+
+
+update studenttab
+set sname="cutu"
+where id=11;
+
+
+delete
+from studenttab 
+where id=13;
+
+------------------------
+PRIMARY KEY & FOREIGN KEY
+
+create table address( 
+id int primary key auto_increment,
+lane1 varchar(20),
+city varchar(20),
+state varchar(20),
+country varchar(20),
+pin int
+);
+
+insert into address values(21, "l1", "mys", "ka","ind",570028);
+insert into address values(22, "lab", "blr", "ka","ind",570026);
+
+
+create table usertab( 
+id int primary key auto_increment,
+uname varchar(20),
+password varchar(20),
+email varchar(20),
+addressid int,
+foreign key(addressid) references address(id)
+);
+
+insert into usertab values(50, "u1","abc", "u1.com", 21);
+insert into usertab values(52, "u2","efg", "u2.com", 25); --error cuz 25 does not exsists in address table
+insert into usertab values(53, "u3","vbn", "u3.com", 22);
+
+---------------------------------------------------------------------------------------------------------------------------------------
+April 3rd
+
+---------
+GROUP BY:
+---------
+
+>The GROUP BY statement is often used with aggregate functions (COUNT(), MAX(), MIN(), SUM(), AVG()) to group the result-set by one or more columns.
+>golden rule1 : All column names from the SELECT clause should either appear in the GROUP BY clause or be used in the aggregate functions.
+>golden rule2 : whenever u find, on each X or per X, that feild X will be used by in groub by.
+
+1.eg => lists the number of customers in each country																	
+cid,    cname,    city,          postal_code,            country
+1	John	  NewYorkCity	        10001		NY
+2	Smith	  Buffalo		14221		NY
+3	Rach	  Mumbai		400001		India
+4	Neha	  New Delhi		110001		India
+5	selena    Albany		12203		NY
+6	Lee	  Sydney		2000		AUS	
+
+
+SELECT COUNT(cid) AS customer_count, Country
+FROM Customer
+GROUP BY Country;
+
+customer_count  country
+2		India
+1		AUS
+3		NY
+
+Note: if u want count to be displayed as high to low ,then after group by add this line 'ORDER BY customer_count DESC;'	 			
+
+2.eg => find out how many people visited the museum on each day
+visit table : date, price, duration
+
+SELECT date, COUNT(*)
+FROM visit
+GROUP BY date;
+
+
+3.eg =>calculate the average salary for each department in a company  
+
+table:employees
+id	name	dept	salary
+1	Alice	HR	50000
+2	Bob	HR	60000
+3	Carol	Sales	70000
+4	Dave	Sales	80000
+5	Eve	IT	90000
+6	Frank	IT	100000
+
+SELECT department, AVG(salary) as avg_salary
+FROM employees
+GROUP BY department;
+
+department	avg_salary
+HR		55000       //(50000+60000)/2 
+Sales		75000
+IT		95000
+
+
+4.eg => calculate the total sales for each product category in a company
+
+table: products
+id	name		category	sales
+1	Product A	Electronics	10000
+2	Product B	Fashion		20000
+3	Product C	Electronics	15000
+4	Product D	Beauty		5000
+5	Product E	Fashion		30000
+6	Product F	Beauty	-	10000
+
+SELECT category, SUM(sales) as total_sales
+FROM products
+GROUP BY category;
+
+category	total_sales
+Electronics	25000
+Fashion		50000
+Beauty		15000
+
+
+5.eg =>find the highest salary for each department in a company:
+
+table: employees
+id	name	department	salary
+1	Alice	HR		50000
+2	Bob	HR		60000
+3	Carol	Sales		70000
+4	Dave	Sales		80000
+5	Eve	IT		90000
+6	Frank	IT		100000
+
+SELECT department, MAX(salary) as max_salary
+FROM employees
+GROUP BY department;
+
+department	max_salary
+HR		60000
+Sales		80000
+IT		100000
+
+
+-----------------------------------------------------------------------------------------------
+
+---------
+GROUP BY w HAVING:
+---------
+
+>The HAVING clause was added to SQL because the WHERE keyword cannot be used with aggregate functions.
+
+Q: Difference between WHERE and HAVING clause
+
+   a) WHERE:  Filters rows before grouping.  Works with all SQL queries.		 Cannot use aggregate functions like SUM().
+   b) HAVING: Filters rows after grouping. Works with aggregate functions and GROUP BY.  Can use aggregate functions like SUM().
+
+
+
+1.eg => find departments with more than two employees and an average salary greater than 50000
+
+
+table:employees
+id	name	department	salary
+1	Alice	HR		50000
+2	Bob	HR		60000
+3	Carol	Sales		70000
+4	Dave	Sales		80000
+5	Eve	IT		90000
+6	Frank	IT		100000
+
+SELECT department, AVG(salary) as avg_salary, COUNT(*) as num_employees
+FROM employees
+GROUP BY department
+HAVING num_employees > 2 AND avg_salary > 50000;
+
+department	avg_salary	num_employees
+Sales		75000		2
+IT		95000		2
+
+
+2.eg=>  find the total sales for each product category with sales greater than 100000
+
+table: products
+id	name	category		sales
+1	Product A	Electronics	10000
+2	Product B	Fashion		20000
+3	Product C	Electronics	150000
+4	Product D	Beauty		50000
+5	Product E	Fashion		30000
+6	Product F	Beauty		100000
+
+
+SELECT category, SUM(sales) as total_sales
+FROM products
+GROUP BY category
+HAVING total_sales > 100000;
+
+category	total_sales
+Electronics	160000
+
+
+3.eg =>  find the number of customers with more than three orders
+
+table: orders
+id  customer_id	order_date
+1	100	2022-01-01
+2	101	2022-01-02
+3	102	2022-01-03
+4	100	2022-01-04
+5	100	2022-01-05
+6	103	2022-01-06
+7	101	2022-01-07
+
+SELECT customer_id, COUNT(*) as num_orders
+FROM orders
+GROUP BY customer_id
+HAVING num_orders > 3;
+
+
+customer_id	num_orders
+100		3
+101		2
+
+
+
+-----------------------------------------------------------------------------------------------
+
+---------
+ORDER BY:
+---------
+>ORDER BY clause is used in SQL queries to sort the results of a query in ascending or descending order
+
+1.eg => Ordering Customers by Name
+
+id	name		city		state
+1	riya		New York	NY
+2	Bob		Boston	MA
+3	Charlie 	San Diego	CA
+4	Lee		Seattle	WA
+
+SELECT id, name, city, state
+FROM customers
+ORDER BY name;
+
+
+id	name		city		state
+2	Bob		Boston	MA
+3	Charlie 	San Diego	CA
+4	Lee		Seattle	WA
+1	riya		New York	NY
+
+
+2.eg=>  Ordering Products by Price
+
+id	name	description	         	price
+1	Widget	A small widget			9.99
+2	Gizmo	A fancy gizmo			49.99
+3	Thing	An odd contraption		19.99
+4	Doodad	A useful doodad			4.99
+
+SELECT id, name, description, price
+FROM products
+ORDER BY price DESC;
+
+id	name	description			price
+2	Gizmo	A fancy gizmo	 		49.99
+3	Thing	An odd contraption		19.99
+1	Widget	A small widget			9.99
+4	Doodad	A useful doodad			4.99
+
+
+3.eg=>  Ordering Orders by Date
+
+
+order_idcustomer_id		order_date			total_amount
+1	100			2022-01-01			50.00
+2	101			2022-02-01			75.00
+3	102			2022-03-01			100.00
+4	100			2022-04-01			125.00
+5	103			2022-05-01			150.00
+
+SELECT order_id, customer_id, order_date, total_amount
+FROM orders
+ORDER BY order_date;
+
+order_id	customer_id	order_date	total_amount
+1	0100			2022-01-01	50.00
+2	101			2022-02-01	75.00
+3	102			2022-03-01	100.00
+4	100			2022-04-01	125.00
+5	103			2022-05-01	150.00
+
+-----------------------------------------------------------------------------------------------
+
+------------------
+SQL JOINSS
+-----------------
+
+
+1) An INNER JOIN is a type of join in SQL that returns only the rows from both tables that match the specified join condition. 
+
+eg)
+
+Students Table
+student_id	name		email
+1		Alice		alice@example.com
+2		Bob		bob@example.com
+3		Charlie	charlie@example.com
+4		David		david@example.com
+
+Grades Table
+grade_id	student_id	course	      grade
+1		1		Math		A
+2		1		Science		B
+3		2		English		A
+4		2		Social		C
+5		3		Math		A
+6		3		Science		A
+
+
+SELECT students.name, grades.course, grades.grade
+FROM students
+INNER JOIN grades
+ON students.student_id = grades.student_id;
+
+name		course	     grade
+Alice		Math		A
+Alice		Science		B
+Bob		English		A
+Bob		Social		C
+Charlie		Math		A
+Charlie		Science		A
+
+-----------------------
+2)LEFT JOIN
+
+eg)
+
+SELECT emp_name, dept_name
+FROM employees
+LEFT JOIN departments ON employees.emp_dept = departments.dept_id;
+
+
+
+     employees                		 departments
+| emp_id | emp_name | emp_dept |     | dept_id | dept_name |
+|--------|----------|----------|     |---------|-----------|
+| 1      | John     | 1        |     | 1       | Sales     |
+| 2      | Jane     | 2        |     | 2       | Marketing |
+| 3      | Bob      | 1        |     | 3       | HR        |
+| 4      | Alice    | NULL     |
+| 5      | Jack     | 3        |
+
+       LEFT JOIN (ON emp_dept = dept_id)
+
+| emp_name | dept_name |
+|----------|-----------|
+| John     | Sales     |
+| Jane     | Marketing |
+| Bob      | Sales     |
+| Alice    | NULL      |
+| Jack     | HR        |
+
+
+------------------------
+3)RIGHT JOIN
+
+eg)
+
+SELECT emp_name, dept_name
+FROM employees
+RIGHT JOIN departments ON employees.emp_dept = departments.dept_id;
+
+
+     employees                 		departments
+| emp_id | emp_name | emp_dept |     | dept_id | dept_name |
+|--------|----------|----------|     |---------|-----------|
+| 1      | John     | 1        |     | 1       | Sales     |
+| 2      | Jane     | 2        |     | 2       | Marketing |
+| 3      | Bob      | 1        |     | 3       | HR        |
+| 4      | Alice    | NULL     |     | 4       | IT        |
+| 5      | Jack     | 3        |
+
+       RIGHT JOIN (ON emp_dept = dept_id)
+
+| emp_name | dept_name |
+|----------|-----------|
+| John     | Sales     |
+| Bob      | Sales     |
+| Jane     | Marketing |
+| Jack     | HR        |
+| NULL     | IT        |
+
+------------------------
+
+4) FULL JOIN
+
+eg)
+
+SELECT emp_name, dept_name
+FROM employees
+FULL OUTER JOIN departments ON employees.emp_dept = departments.dept_id;
+
+     employees                 departments
+| emp_id | emp_name | emp_dept |     | dept_id | dept_name |
+|--------|----------|----------|     |---------|-----------|
+| 1      | John     | 1        |     | 1       | Sales     |
+| 2      | Jane     | 2        |     | 2       | Marketing |
+| 3      | Bob      | 1        |     | 3       | HR        |
+| 4      | Alice    | NULL     |     | 4       | IT        |
+| 5      | Jack     | 3        |
+
+       FULL OUTER JOIN (ON emp_dept = dept_id)
+
+| emp_name | dept_name |
+|----------|-----------|
+| John     | Sales     |
+| Bob      | Sales     |
+| Jane     | Marketing |
+| Jack     | HR        |
+| Alice    | NULL      |
+| NULL     | IT        |
+
+-----------------------------------------------------------------------------------------------
+
+COUNT() function with distinct clause
+-------------------------------------
+
+The DISTINCT clause ensures that only unique customer_id values are considered.
+
+Q1.
+
+ Example Table: orders
+order_id	customer_id	product_id
+1			101	201
+2			102	202
+3			101	203
+4			103	201
+5			102	202
+
+
+SELECT COUNT(DISTINCT customer_id) AS unique_customers
+FROM orders;
+
+Output:
+unique_customers 
+3
+
+
+Q2. How many unique courses have students enrolled in?
+
+ Example Table: students
+student_id	course_id	grade
+1			101	A
+2			102	B
+3			101	A
+4			103	C
+5			101	B
+6			102	A
+
+
+SELECT COUNT(DISTINCT course_id) AS unique_courses
+FROM students;
+
+Output:
+unique_courses
+3
+
+------------------------------
+Q3: Same as Q2 +  how many unique grades exist for a specific course.
+
+SELECT COUNT(DISTINCT grade) AS unique_grades_for_course_101
+FROM students
+WHERE course_id = 101;
+
+Output:
+unique_grades_for_course_101
+2
+
+
+Explanation:
+For course_id = 101, the grades are A, A, and B.
+The DISTINCT grades are A and B, so the count is 2.
+-----------------------------------------------------------------------------------------------------------------------------
+
+Q: Customer Placing the Largest Number of Orders
+
+Example Table: orders
+order_id   customer_id	order_date
+1		101	2023-01-01
+2		102	2023-01-02
+3		101	2023-01-03
+4		103	2023-01-04
+5		101	2023-01-05
+6		102	2023-01-06
+
+
+SELECT customer_id, COUNT(order_id) AS total_orders
+FROM orders
+GROUP BY customer_id
+ORDER BY total_orders DESC
+LIMIT 1;
+
+
+Output:
+customer_id	total_orders
+101		3
+
+Explanation:
+COUNT(order_id) counts the total number of orders placed by each customer.
+GROUP BY customer_id groups the orders by customer.
+ORDER BY total_orders DESC sorts the results in descending order of the total number of orders.
+LIMIT 1 ensures that only the top customer with the largest number of orders is returned.
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+LIMIT CLAUSE
+: is a SQL statement that is used to limit the number of rows returned by a query. It is useful when you want to retrieve only a subset of the results, or when you want to optimize performance by retrieving only the first few rows of a large result set.
+
+name	age	grade
+Alice	16	A
+Bob	15	B
+Carl	17	C
+Dave	16	B
+Eve	15	A
+Frank	17	D
+Gina	16	B
+Harry	15	C
+Isabel17	A
+
+SELECT name, age, grade
+FROM students
+LIMIT 3;
+
+name	age	grade
+Alice	16	A
+Bob	15	B
+Carl	17	C
+
+
+------------------------
+LIMIT with OFFSET : retrieve a subset of rows from a result set starting from a specific position.
+
+syntax: SELECT column1, column2, ...
+FROM table_name
+LIMIT number OFFSET offset_value;
+
+name	age	salary
+Alice	25	50000
+Bob	30	60000
+Carl	35	70000
+Dave	40	80000
+Eve	45	90000
+Frank	50	100000
+Gina	55	110000
+Harry	60	120000
+Isabel	65	130000
+
+SELECT name, age, salary
+FROM employees
+LIMIT 3 OFFSET 1;
+
+name	age	salary
+Bob	30	60000
+Carl	35	70000
+Dave	40	80000
+
+------------------------
+
+
